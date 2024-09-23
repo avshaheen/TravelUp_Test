@@ -1,0 +1,103 @@
+﻿@model TravelUp.Application.Models.CreateItemVM
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Create</h1>
+    <h4>Item</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form id="createItemForm">
+                <div id="validationSummary" class="text-danger"></div>
+                <div class="form-group">
+                    <label for="Name">Name</label>
+                    <input id="Name" name="Name" class="form-control" />
+                    <div id="nameError" class="text-danger"></div>
+                </div>
+                <div class="form-group">
+                    <label for="Description">Description</label>
+                    <input id="Description" name="Description" class="form-control" />
+                    <div id="descriptionError" class="text-danger"></div>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+    <div>
+        <a href="@Url.Action("Index", "Item")">Back to List</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById('createItemForm');
+            const validationSummary = document.getElementById('validationSummary');
+            const nameInput = document.getElementById('Name');
+            const descriptionInput = document.getElementById('Description');
+            const nameError = document.getElementById('nameError');
+            const descriptionError = document.getElementById('descriptionError');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                let isValid = true;
+
+                // Clear previous errors
+                validationSummary.textContent = '';
+                nameError.textContent = '';
+                descriptionError.textContent = '';
+
+                // Basic client-side validation
+                if (!nameInput.value.trim()) {
+                    isValid = false;
+                    nameError.textContent = 'Please enter a name.';
+                }
+
+                if (!descriptionInput.value.trim()) {
+                    isValid = false;
+                    descriptionError.textContent = 'Please enter a description.';
+                }
+
+                if (!isValid) {
+                    validationSummary.textContent = 'Please correct the errors and try again.';
+                } else {
+                    // Convert form data to JSON and send via AJAX
+                    const formData = {
+                        Name: nameInput.value,
+                        Description: descriptionInput.value
+                    };
+
+                    fetch('@Url.Action("Create", "Item")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = '@Url.Action("Index", "Item")';
+                            } else {
+                                validationSummary.textContent = 'Error: ' + data.errors.join(', ');
+                            }
+                        })
+                        .catch(error => {
+                            validationSummary.textContent = 'Error: ' + error.message;
+                        });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
